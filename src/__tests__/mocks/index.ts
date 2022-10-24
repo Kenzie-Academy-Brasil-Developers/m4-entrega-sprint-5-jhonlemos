@@ -31,6 +31,10 @@ export const mockedCategory : ICategoryRequest = {
     name: "Apartamento"
 }
 
+export const mockedCategory2: ICategoryRequest = {
+    name: "Casa"
+}
+
 export const mockedProperty : IPropertyRequest = {
     size: 350,
     value: 10000000,
@@ -105,16 +109,9 @@ export const mockedScheduleInvalidDate : IScheduleRequest = {
     userId: ""
 }
 
-export const mockedScheduleInvalidHourLess8 : IScheduleRequest = {
+export const mockedScheduleInvalidHour : IScheduleRequest = {
     date: "2022/08/17",
-    hour: "5:30",
-    propertyId: "",
-    userId: ""
-}
-
-export const mockedScheduleInvalidHourMore18 : IScheduleRequest = {
-    date: "2022/08/17",
-    hour: "18:30",
+    hour: "05:30",
     propertyId: "",
     userId: ""
 }

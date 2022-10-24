@@ -2,7 +2,7 @@ import { DataSource } from "typeorm";
 import AppDataSource from "../../../data-source";
 import request from "supertest"
 import app from "../../../app";
-import {mockedUser, mockedAdmin, mockedAdminLogin, mockedCategory, mockedProperty, mockedPropertyInvalidCategoryId, mockedPropertyInvalidState, mockedPropertyInvalidZipCode, mockedUserLogin} from "../../mocks"
+import {mockedUser, mockedAdmin, mockedAdminLogin, mockedCategory, mockedProperty, mockedPropertyInvalidCategoryId, mockedPropertyInvalidState, mockedPropertyInvalidZipCode, mockedUserLogin, mockedCategory2} from "../../mocks"
 
 
 describe("/properties", () => {
@@ -18,19 +18,33 @@ describe("/properties", () => {
         await request(app).post('/users').send(mockedUser)
         await request(app).post('/users').send(mockedAdmin)
         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
-        await request(app).post('/categories').set("Authorization", `Bearer ${adminLoginResponse.body.token}`).send(mockedCategory)
+        await request(app).post('/categories').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedCategory)
     })
 
     afterAll(async() => {
         await connection.destroy()
     })
 
+
+
+    test("POST /categories -  Must be able to create category",async () => {
+        const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
+        const response = await request(app).post('/categories').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedCategory2)
+
+        expect(response.body).toHaveProperty("name")
+        expect(response.body).toHaveProperty("id")
+        expect(response.status).toBe(201)
+     
+    })
+
+
+
     test("POST /properties -  Must be able to create a property",async () => {
       
         const categories = await request(app).get('/categories')
         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
         mockedProperty.categoryId = categories.body[0].id
-        const response = await request(app).post('/properties').set("Authorization", `Bearer ${adminLoginResponse.body.token}`).send(mockedProperty)
+        const response = await request(app).post('/properties').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedProperty)
 
         expect(response.body).toHaveProperty("id")
         expect(response.body).toHaveProperty("value")
@@ -55,7 +69,7 @@ describe("/properties", () => {
         const categories = await request(app).get('/categories')
         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
         mockedProperty.categoryId = categories.body[0].id
-        const response = await request(app).post('/properties').set("Authorization", `Bearer ${adminLoginResponse.body.token}`).send(mockedProperty)
+        const response = await request(app).post('/properties').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedProperty)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(400)
@@ -66,7 +80,7 @@ describe("/properties", () => {
         const categories = await request(app).get('/categories')
         const userLoginResponse = await request(app).post("/login").send(mockedUserLogin);
         mockedProperty.categoryId = categories.body[0].id
-        const response = await request(app).post('/properties').set("Authorization", `Bearer ${userLoginResponse.body.token}`).send(mockedProperty)
+        const response = await request(app).post('/properties').set("Authorization", `${userLoginResponse.body.token}`).send(mockedProperty)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(403)
@@ -85,7 +99,7 @@ describe("/properties", () => {
 
     test("POST /properties -  should not be able to create property with invalid categoryId",async () => { 
         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
-        const response = await request(app).post('/properties').set("Authorization", `Bearer ${adminLoginResponse.body.token}`).send(mockedPropertyInvalidCategoryId)
+        const response = await request(app).post('/properties').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedPropertyInvalidCategoryId)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(404)
@@ -96,7 +110,7 @@ describe("/properties", () => {
         const categories = await request(app).get('/categories')
         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
         mockedPropertyInvalidZipCode.categoryId = categories.body[0].id
-        const response = await request(app).post('/properties').set("Authorization", `Bearer ${adminLoginResponse.body.token}`).send(mockedPropertyInvalidZipCode)
+        const response = await request(app).post('/properties').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedPropertyInvalidZipCode)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(400)
@@ -108,7 +122,7 @@ describe("/properties", () => {
         const categories = await request(app).get('/categories')
         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
         mockedPropertyInvalidState.categoryId = categories.body[0].id
-        const response = await request(app).post('/properties').set("Authorization", `Bearer ${adminLoginResponse.body.token}`).send(mockedPropertyInvalidState)
+        const response = await request(app).post('/properties').set("Authorization", `${adminLoginResponse.body.token}`).send(mockedPropertyInvalidState)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(400)
